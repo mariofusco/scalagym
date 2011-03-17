@@ -2,14 +2,9 @@ package scalagym.parser
 
 import TokenBuilder._
 
-trait Parser { this: ExpressionBuilder =>
-
-  def getQuery(s: String) = new {
-    def withFieldName(fieldName: String) = buildExpression(tokenize(s)) withFieldName fieldName
-  }
-
-  private def tokenize(s: String): List[Token] =
-    parseWords(s.split(" ").toList, List[Token](), false).reverse
+trait Tokenizer {
+  protected def tokenize(s: String): List[Token] =
+    parseWords(s.split(" ").toList, List[Token](), false)
 
   private def parseWords(words: List[String], tokens: List[Token], inValue: Boolean): List[Token] = words match {
     case Nil => tokens
@@ -29,11 +24,13 @@ trait Parser { this: ExpressionBuilder =>
     case EndWithQuotes(value) => if (inValue) NotNullValue(value) else throw ParseException()
     case s => if (inValue) PartialToken(s) else s.toToken
   }
+}
 
-  private def buildExpression(tokens: List[Token]): Expression =
-    ((List[Token]() /: tokens)(foldFunction)).head.asInstanceOf[Expression]
+trait TokenTraverser { this: ExpressionBuilder =>
+  protected def buildExpression(tokens: List[Token]): Expression =
+    ((tokens :\ List[Token]())(foldFunction)).head.asInstanceOf[Expression]
 
-  def foldFunction(ts: List[Token], t: Token): List[Token] = t match {
+  private def foldFunction(t: Token, ts: List[Token]): List[Token] = t match {
     case pt: PartialToken => throw ParseException()
     case v: Value =>  v :: ts
     case op: UnaryOperator => unaryOperation(op, ts.head.asInstanceOf[Value]) :: ts.tail
@@ -51,6 +48,12 @@ trait Parser { this: ExpressionBuilder =>
       case _ => throw ParseException()
     }
     case e: Expression => throw ParseException()
+  }
+}
+
+trait Parser extends Tokenizer with TokenTraverser { this: ExpressionBuilder =>
+  def getQuery(s: String) = new {
+    def withFieldName(fieldName: String) = buildExpression(tokenize(s)) withFieldName fieldName
   }
 }
 
