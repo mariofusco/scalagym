@@ -1,5 +1,8 @@
 package scalagym
 
+/**
+ * @author Mario Fusco - twitter: @mariofusco
+ */
 object ValidationDSL {
 
   implicit def toValidated[A](a: A) = new {
