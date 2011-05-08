@@ -36,14 +36,17 @@ object PersonValidator extends Application {
       0 to 130 contains _.age
     }
 
+  // Validation style 1: flatMap on Validated monad
   val p1 = Person("Mario", 37).validable flatMap validAge flatMap validName
 
+  // Validation style 2: for-comprehension
   val p2 = for {
     x <- Person("mario", 137).validable
     y <- validAge(x)
     z <- validName(y)
   } yield z
 
+  // Validation style 3: DSL
   val p3 = validate(Person("mario", 137)) using List(
     "Age must be in range" validIf {
       0 to 130 contains _.age
