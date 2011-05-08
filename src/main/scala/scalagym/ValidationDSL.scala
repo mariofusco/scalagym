@@ -19,7 +19,7 @@ object ValidationDSL {
   }
 
   def validate[A](a: A) = new {
-    def using(l: List[A => Validated[A]]) = (a.validable /: l)(_ flatMap _)
+    def using(l: (A => Validated[A])*) = (a.validable /: l)(_ flatMap _)
   }
 }
 
@@ -50,7 +50,7 @@ object PersonValidator extends Application {
   } yield z
 
   // Validation style 3: DSL
-  val p3 = validate(Person("mario", 137)) using List(
+  val p3 = validate(Person("mario", 137)) using (
     "Age must be in range" validIf {
       0 to 130 contains _.age
     },
