@@ -39,7 +39,7 @@ object Fold extends Application {
   implicit def folder[A](list: List[A]) = new {
     def aggregate[B](start: B, f: (A, B) => B) = Fold.myFoldLeft(list)(start, f)
   }
-  println(animals.aggregate(0, (s: String, t: Int) => s.length + t))
+//  println(animals.aggregate(0, (s: String, t: Int) => s.length + t))
 
   def sumStringLength(strings: List[String]) = myFoldLeft(strings)(0, (s: String, t: Int) => s.length + t)
   println(sumStringLength(animals))
